@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reverse String</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0a0a0f; --surface: #13131a; --border: #2a2a3a;
+      --accent: #ff4d6d; --accent2: #4dffb4; --text: #e8e8f0; --muted: #6b6b88;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 2rem; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(255,77,109,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,77,109,0.04) 1px, transparent 1px); background-size: 40px 40px; animation: gridShift 20s linear infinite; z-index: 0; }
+    @keyframes gridShift { 0% { transform: translate(0,0); } 100% { transform: translate(40px,40px); } }
+    .container { position: relative; z-index: 1; width: 100%; max-width: 560px; }
+    header { margin-bottom: 3rem; }
+    .label { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; margin-bottom: 0.5rem; }
+    h1 { font-size: clamp(2.2rem, 6vw, 3.5rem); font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+    h1 span { color: var(--accent); }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; position: relative; overflow: hidden; }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
+    .field { margin-bottom: 1.5rem; }
+    .field-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.15em; color: var(--muted); text-transform: uppercase; margin-bottom: 0.6rem; display: block; }
+    input[type="text"] { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'Space Mono', monospace; font-size: 1.1rem; padding: 0.9rem 1.1rem; outline: none; transition: border-color 0.2s, box-shadow 0.2s; }
+    input[type="text"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,77,109,0.12); }
+    input[type="text"]::placeholder { color: var(--muted); }
+    .output-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.9rem 1.1rem; min-height: 3.2rem; display: flex; align-items: center; transition: border-color 0.3s, box-shadow 0.3s; }
+    .output-box.has-content { border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(77,255,180,0.08); }
+    .output-text { font-family: 'Space Mono', monospace; font-size: 1.1rem; color: var(--accent2); word-break: break-all; }
+    .output-text.empty { color: var(--muted); font-size: 0.85rem; }
+    .btn-wrap { overflow: hidden; max-height: 0; opacity: 0; transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease, margin 0.35s; margin-bottom: 0; }
+    .btn-wrap.visible { max-height: 80px; opacity: 1; margin-bottom: 1.5rem; }
+    button { width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 10px; font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; letter-spacing: 0.05em; padding: 0.9rem 1.5rem; cursor: pointer; transition: background 0.2s, transform 0.1s; }
+    button:hover { background: #ff2d52; }
+    button:active { transform: scale(0.98); }
+    .meta { display: flex; justify-content: flex-end; margin-top: 0.4rem; }
+    .char-count { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--muted); }
+    .char-count span { color: var(--accent); font-weight: 700; }
+    .toggle-wrap { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem; }
+    .toggle-label { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); transition: color 0.2s; user-select: none; }
+    .toggle-label.active { color: var(--text); }
+    .toggle { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track { position: absolute; inset: 0; background: var(--border); border-radius: 999px; cursor: pointer; transition: background 0.25s; }
+    .toggle input:checked + .toggle-track { background: var(--accent); }
+    .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform 0.25s cubic-bezier(0.4,0,0.2,1); pointer-events: none; }
+    .toggle input:checked ~ .toggle-thumb { transform: translateX(22px); }
+    footer { margin-top: 1.5rem; font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--muted); text-align: center; letter-spacing: 0.08em; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <p class="label">// Ejercicio 01</p>
+      <h1>Reverse<br><span>String</span></h1>
+    </header>
+    <div class="toggle-wrap">
+      <span class="toggle-label" id="labelBtn">Boton</span>
+      <label class="toggle">
+        <input type="checkbox" id="modeToggle" />
+        <span class="toggle-track"></span>
+        <span class="toggle-thumb"></span>
+      </label>
+      <span class="toggle-label" id="labelRT">Tiempo Real</span>
+    </div>
+    <div class="card">
+      <div class="field">
+        <label class="field-label" for="inputText">Texto de entrada</label>
+        <input type="text" id="inputText" placeholder="Escribe algo aqui..." autocomplete="off" spellcheck="false" />
+        <div class="meta">
+          <span class="char-count">Caracteres: <span id="charCount">0</span></span>
+        </div>
+      </div>
+      <div class="btn-wrap" id="btnWrap">
+        <button id="reverseBtn">Invertir cadena</button>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label class="field-label">Resultado</label>
+        <div class="output-box" id="outputBox">
+          <span class="output-text empty" id="outputText">El resultado aparecera aqui...</span>
+        </div>
+      </div>
+    </div>
+    <footer>AI4Devs - Reverse String - Claude Sonnet 4.6</footer>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
